@@ -9,7 +9,23 @@ const GRADE_TABLE = [
     { min: 0,  grade: "F", color: "border-red-600 bg-gradient-to-br from-red-950 to-slate-900 text-red-400" },
 ];
 
-// 2. 카드 렌더링 함수
+// 2. 외부 fetch 대신 데이터를 변수에 직접 할당 (경로 에러 원천 차단)
+const sampleData = {
+    "card": {
+        "id": "card_0001",
+        "category": "백엔드 언어",
+        "name": "정밀 연산형 코어 스택",
+        "finalScore": 90,
+        "groups": {
+            "A": { "average": 93 },
+            "B": { "average": 88.86 },
+            "C": { "average": 75.43 }
+        },
+        "comment": "핵심·운영 역량은 정상급이나 부가 매력에서 점수를 깎인, 실무 신뢰형 카드."
+    }
+};
+
+// 3. 카드 렌더링 함수
 function renderCard(cardData) {
     const container = document.getElementById('card-container');
     const style = GRADE_TABLE.find(row => cardData.finalScore >= row.min) || GRADE_TABLE[GRADE_TABLE.length - 1];
@@ -54,13 +70,5 @@ function renderCard(cardData) {
     `;
 }
 
-// 3. 내부 JSON 데이터를 가져와 실행
-fetch('tcg-card-sample.json')
-    .then(response => response.json())
-    .then(data => {
-        renderCard(data.card);
-    })
-    .catch(err => {
-        console.error("데이터 로드 실패:", err);
-        document.getElementById('card-container').innerHTML = `<p class="text-red-400">데이터를 불러오지 못했습니다.</p>`;
-    });
+// 즉시 실행
+renderCard(sampleData.card);
