@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0",
+  "card": {
+    "id": "card_0001",
+    "category": "백엔드 언어",
+    "name": "정밀 연산형 코어 스택",
+    "grade": "A",
+    "finalScore": 90,
+    "weights": { "A": 0.6, "B": 0.3, "C": 0.1 },
+    "groups": {
+      "A": {
+        "label": "핵심 역량",
+        "weight": 0.6,
+        "average": 93,
+        "stats": [
+          { "key": "performance",  "name": "처리 성능",    "value": 96 },
+          { "key": "stability",    "name": "안정성",      "value": 94 },
+          { "key": "scalability",  "name": "확장성",      "value": 95 },
+          { "key": "learnability", "name": "학습 난이도",  "value": 88 },
+          { "key": "ecosystem",    "name": "생태계",      "value": 92 }
+        ]
+      },
+      "B": {
+        "label": "운영 역량",
+        "weight": 0.3,
+        "average": 88.86,
+        "stats": [
+          { "key": "documentation", "name": "문서화",      "value": 90 },
+          { "key": "community",     "name": "커뮤니티",    "value": 92 },
+          { "key": "tooling",       "name": "툴링",        "value": 91 },
+          { "key": "jobMarket",     "name": "채용 시장",   "value": 85 },
+          { "key": "typeSafety",    "name": "타입 안정성",  "value": 96 },
+          { "key": "concurrency",   "name": "동시성",      "value": 80 },
+          { "key": "portability",   "name": "이식성",      "value": 88 }
+        ]
+      },
+      "C": {
+        "label": "부가 매력",
+        "weight": 0.1,
+        "average": 75.43,
+        "stats": [
+          { "key": "syntaxBeauty",   "name": "문법 미려함",    "value": 78 },
+          { "key": "memeFactor",     "name": "밈 친화력",      "value": 60 },
+          { "key": "legacySupport",  "name": "레거시 지원",    "value": 70 },
+          { "key": "mascotCharm",    "name": "마스코트 매력",  "value": 85 },
+          { "key": "conferenceHype", "name": "컨퍼런스 화제성", "value": 72 },
+          { "key": "stickerCount",   "name": "스티커 보유량",  "value": 88 },
+          { "key": "vibes",          "name": "분위기",        "value": 75 }
+        ]
+      }
+    },
+    "comment": "핵심·운영 역량은 정상급이나 부가 매력에서 점수를 깎인, 실무 신뢰형 카드.",
+    "meta": {
+      "createdAt": "2026-06-03T00:00:00Z",
+      "version": 1,
+      "rarityColor": "#2E86DE"
+    }
+  }
+}
