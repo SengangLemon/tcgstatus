@@ -1,22 +1,443 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>19각형 TCG 카드 컬렉션</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <style>
-        body { background-color: #0f172a; color: #f8fafc; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ARCANE CODEX · 19-Facet Card Vault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { ink: "#0b0f19", panel: "#0f1626", panel2: "#0c1220", edge: "#1d2740" },
+        fontFamily: {
+          display: ['"Chakra Petch"', "sans-serif"],
+          body: ['"IBM Plex Sans KR"', "sans-serif"],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  :root { color-scheme: dark; }
+  html, body { background: #0b0f19; }
+  body {
+    font-family: "IBM Plex Sans KR", sans-serif;
+    color: #c9d4ee;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+  /* atmosphere: layered glows + faint grid */
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: -2;
+    background:
+      radial-gradient(900px 500px at 12% -5%, rgba(56,189,248,0.10), transparent 60%),
+      radial-gradient(800px 600px at 100% 0%, rgba(167,139,250,0.10), transparent 55%),
+      radial-gradient(700px 500px at 50% 120%, rgba(244,114,182,0.07), transparent 60%);
+  }
+  body::after {
+    content: "";
+    position: fixed; inset: 0; z-index: -1; opacity: 0.4;
+    background-image:
+      linear-gradient(rgba(120,150,210,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120,150,210,0.05) 1px, transparent 1px);
+    background-size: 46px 46px;
+    mask-image: radial-gradient(120% 100% at 50% 0%, #000 35%, transparent 90%);
+  }
+
+  .grad-text {
+    background: linear-gradient(92deg, #e9f0ff, #7fa6ff 55%, #c79bff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .glass {
+    background: linear-gradient(180deg, rgba(20,28,46,0.85), rgba(11,16,26,0.85));
+    border: 1px solid rgba(120,150,210,0.16);
+    backdrop-filter: blur(8px);
+  }
+
+  /* range sliders */
+  .slider {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 6px; border-radius: 9999px; cursor: pointer;
+    background: linear-gradient(90deg, var(--accent) 85%, #1b2236 85%);
+    transition: background .05s linear;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%;
+    background: #eef3ff; border: 2px solid var(--accent);
+    box-shadow: 0 0 9px var(--accent); cursor: pointer; transition: transform .1s;
+  }
+  .slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  .slider::-moz-range-thumb {
+    width: 15px; height: 15px; border-radius: 50%; background: #eef3ff;
+    border: 2px solid var(--accent); box-shadow: 0 0 9px var(--accent); cursor: pointer;
+  }
+
+  /* TCG card */
+  .tcg-card {
+    position: relative; border-radius: 16px; padding: 16px 16px 18px;
+    border: 1px solid; overflow: hidden;
+    box-shadow: 0 0 22px rgba(var(--glow), 0.28), inset 0 0 34px rgba(var(--glow), 0.06);
+    animation: cardIn .5s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .tcg-card.is-s { animation: cardIn .5s cubic-bezier(.2,.8,.2,1) both, sGlow 2.6s ease-in-out infinite; }
+  .tcg-card::before {
+    content: ""; position: absolute; top: 0; left: 0; width: 60%; height: 100%;
+    background: linear-gradient(110deg, transparent, rgba(255,255,255,0.16), transparent);
+    transform: translateX(-160%) skewX(-18deg); transition: transform .85s ease; pointer-events: none;
+  }
+  .tcg-card:hover::before { transform: translateX(260%) skewX(-18deg); }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
+  @keyframes sGlow {
+    0%,100% { box-shadow: 0 0 22px rgba(255,213,74,.34), inset 0 0 34px rgba(255,213,74,.08); }
+    50%     { box-shadow: 0 0 42px rgba(255,213,74,.62), inset 0 0 44px rgba(255,213,74,.15); }
+  }
+
+  .tcg-card .del {
+    position: absolute; top: 10px; right: 10px; z-index: 5;
+    width: 26px; height: 26px; border-radius: 8px; line-height: 1;
+    background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.14);
+    color: #cdd7ef; font-size: 13px; cursor: pointer; transition: .15s;
+  }
+  .tcg-card .del:hover { background: rgba(248,113,113,0.25); border-color: rgba(248,113,113,0.6); color: #fff; }
+  .tcg-card .badge {
+    font-family: "Chakra Petch"; font-weight: 700; font-size: 26px; line-height: 1;
+    width: 52px; height: 52px; display: grid; place-items: center; border-radius: 12px;
+    border: 1.5px solid; background: rgba(0,0,0,0.28);
+  }
+  .tcg-card .cat { font-family: "Chakra Petch"; font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: #8fa0c4; }
+  .tcg-card .name { font-weight: 700; font-size: 19px; margin-top: 8px; line-height: 1.25; }
+  .tcg-card .radar { margin: 6px auto 4px; max-width: 188px; }
+  .tcg-card .score-row { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 2px; }
+  .tcg-card .score { font-family: "Chakra Petch"; font-weight: 700; font-size: 40px; line-height: 1; }
+  .tcg-card .slash { font-family: "Chakra Petch"; color: #6f7fa3; font-size: 15px; margin-left: 2px; }
+  .tcg-card .gtag { font-family: "Chakra Petch"; font-size: 10px; letter-spacing: .18em; padding: 4px 8px; border: 1px solid; border-radius: 999px; }
+  .tcg-card .cmt { margin-top: 12px; font-size: 12.5px; color: #9fb0d4; font-style: italic; line-height: 1.5; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px; }
+
+  .field { background: #0a0f1b; border: 1px solid rgba(120,150,210,0.18); border-radius: 10px; padding: 9px 12px; width: 100%; color: #e7eeff; font-size: 14px; transition: .15s; }
+  .field::placeholder { color: #5d6b8c; }
+  .field:focus { outline: none; border-color: rgba(120,170,255,0.6); box-shadow: 0 0 0 3px rgba(90,150,255,0.12); }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #243152; border-radius: 99px; border: 2px solid #0b0f19; }
+  ::-webkit-scrollbar-track { background: transparent; }
+</style>
 </head>
-<body class="p-6 min-h-screen flex flex-col items-center justify-center">
+<body>
+  <!-- top bar -->
+  <header class="border-b border-edge/70 bg-ink/70 sticky top-0 z-30 backdrop-blur-md">
+    <div class="max-w-[1400px] mx-auto px-5 py-4 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg grid place-items-center font-display font-bold text-ink"
+             style="background:linear-gradient(135deg,#7fa6ff,#c79bff);box-shadow:0 0 18px rgba(140,160,255,.5)">19</div>
+        <div>
+          <h1 class="font-display font-bold tracking-wide text-lg leading-none grad-text">ARCANE CODEX</h1>
+          <p class="text-[11px] tracking-[0.25em] text-slate-500 font-display mt-1">19-FACET CARD VAULT</p>
+        </div>
+      </div>
+      <div class="hidden sm:block text-right">
+        <p class="text-[11px] text-slate-500 font-display tracking-widest">WEIGHTED ENGINE</p>
+        <p class="text-xs text-slate-400">A×0.6 · B×0.3 · C×0.1</p>
+      </div>
+    </div>
+  </header>
 
-    <h1 class="text-3xl font-black mb-8 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
-        🃏 나만의 TCG 카드 컬렉션
-    </h1>
+  <main class="max-w-[1400px] mx-auto px-5 py-7 grid gap-7 lg:grid-cols-[minmax(0,440px)_1fr]">
 
-    <div id="card-container"></div>
+    <!-- LEFT: form -->
+    <section class="glass rounded-2xl p-5 lg:sticky lg:top-24 lg:self-start max-h-[calc(100vh-7.5rem)] overflow-y-auto">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="w-1.5 h-5 rounded-full" style="background:linear-gradient(#7fa6ff,#c79bff)"></span>
+        <h2 class="font-display font-bold tracking-wide text-base text-slate-100">스탯 입력</h2>
+      </div>
 
-    <script src="main.js"></script>
+      <div class="grid grid-cols-1 gap-3 mb-5">
+        <div>
+          <label class="block text-[11px] font-display tracking-widest text-slate-400 mb-1.5">대분류</label>
+          <input id="f-category" class="field" placeholder="예: 백엔드 언어" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-display tracking-widest text-slate-400 mb-1.5">카드 이름</label>
+          <input id="f-name" class="field" placeholder="예: 정밀 연산형 코어 스택" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-display tracking-widest text-slate-400 mb-1.5">한줄평</label>
+          <textarea id="f-comment" rows="2" class="field resize-none" placeholder="이 카드의 성향을 한 줄로..."></textarea>
+        </div>
+      </div>
+
+      <div id="formGroups" class="space-y-5"></div>
+
+      <!-- live preview + add -->
+      <div class="mt-6 rounded-xl border border-edge/80 bg-panel2/70 p-4 flex items-center justify-between">
+        <div>
+          <p class="text-[11px] font-display tracking-widest text-slate-400">예상 평가</p>
+          <p class="mt-0.5"><span id="pv-score" class="font-display font-bold text-3xl text-slate-100">85</span><span class="text-slate-500 font-display">/100</span></p>
+        </div>
+        <div id="pv-grade" class="font-display font-bold text-2xl px-4 py-2 rounded-xl border" style="color:#34d399;border-color:#34d39988;box-shadow:0 0 16px #34d39955;">B</div>
+      </div>
+
+      <button id="addBtn"
+        class="mt-4 w-full py-3 rounded-xl font-display font-bold tracking-wider text-ink transition hover:brightness-110 active:scale-[.99]"
+        style="background:linear-gradient(120deg,#7fa6ff,#c79bff);box-shadow:0 10px 30px -8px rgba(140,160,255,.6)">
+        + 카드 추가
+      </button>
+    </section>
+
+    <!-- RIGHT: album -->
+    <section>
+      <div class="flex items-center justify-between gap-3 mb-5">
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-5 rounded-full" style="background:linear-gradient(#c79bff,#f472b6)"></span>
+          <h2 class="font-display font-bold tracking-wide text-base text-slate-100">수집한 카드</h2>
+          <span id="count" class="text-xs font-display px-2 py-0.5 rounded-full bg-edge/60 text-slate-300 border border-edge">0</span>
+        </div>
+        <button id="resetBtn"
+          class="text-xs font-display tracking-wider px-3 py-2 rounded-lg border border-red-500/30 text-red-300/90 hover:bg-red-500/15 hover:border-red-500/60 transition">
+          앨범 초기화
+        </button>
+      </div>
+
+      <div id="empty" class="hidden glass rounded-2xl border-dashed py-20 text-center">
+        <p class="font-display tracking-widest text-slate-500 text-sm">아직 수집한 카드가 없습니다</p>
+        <p class="text-slate-600 text-xs mt-2">좌측에서 스탯을 조정하고 카드를 추가해 보세요.</p>
+      </div>
+
+      <div id="album" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+    </section>
+  </main>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ---------- config ---------- */
+  const GROUPS = [
+    { key: "A", title: "핵심 역량", weight: 0.6, accent: "#38bdf8",
+      stats: ["처리 성능", "안정성", "확장성", "생태계 규모", "생산성"] },
+    { key: "B", title: "운영 역량", weight: 0.3, accent: "#a78bfa",
+      stats: ["문서화 수준", "커뮤니티", "디버깅 툴링", "채용 시장성", "타입 안정성", "동시성 제어", "이식성"] },
+    { key: "C", title: "부가 매력", weight: 0.1, accent: "#f472b6",
+      stats: ["문법 미려함", "밈 친화력", "레거시 지원", "마스코트 매력", "트렌디함", "굿즈 스티커", "특유의 감성"] },
+  ];
+
+  const GRADE_META = {
+    "S":  { color: "#ffd54a", glow: "255,213,74",  grad: "linear-gradient(160deg,#3a2e08,#15100340)" },
+    "A+": { color: "#c084fc", glow: "192,132,252", grad: "linear-gradient(160deg,#291640,#120a2240)" },
+    "A":  { color: "#38bdf8", glow: "56,189,248",  grad: "linear-gradient(160deg,#0c2740,#07162240)" },
+    "B":  { color: "#34d399", glow: "52,211,153",  grad: "linear-gradient(160deg,#0c2e26,#06170f40)" },
+    "C":  { color: "#fbbf24", glow: "251,191,36",  grad: "linear-gradient(160deg,#2d2410,#16100740)" },
+    "C-": { color: "#f59e0b", glow: "245,158,11",  grad: "linear-gradient(160deg,#2a1c0a,#140d0440)" },
+    "F":  { color: "#f87171", glow: "248,113,113", grad: "linear-gradient(160deg,#3a0f12,#1c060840)" },
+  };
+
+  /* ---------- persistence (localStorage + in-memory fallback) ---------- */
+  const KEY = "arcane_codex_cards_v1";
+  const store = (() => {
+    let mem = "[]";
+    return {
+      read() { try { return JSON.parse(localStorage.getItem(KEY) || mem); } catch (e) { try { return JSON.parse(mem); } catch (_) { return []; } } },
+      write(arr) { mem = JSON.stringify(arr); try { localStorage.setItem(KEY, mem); } catch (e) {} },
+    };
+  })();
+
+  /* ---------- math ---------- */
+  const avg = (a) => a.reduce((s, v) => s + v, 0) / a.length;
+
+  function gradeOf(score) {
+    if (score >= 99) return "S";
+    if (score >= 97) return "A+";
+    if (score >= 90) return "A";
+    if (score >= 80) return "B";
+    if (score >= 71) return "C";
+    if (score === 70) return "C-";
+    return "F";
+  }
+
+  function scoreOf(values) {
+    return Math.round(avg(values.A) * 0.6 + avg(values.B) * 0.3 + avg(values.C) * 0.1);
+  }
+
+  /* ---------- helpers ---------- */
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  function setFill(input) {
+    const v = input.value;
+    input.style.background = `linear-gradient(90deg, var(--accent) ${v}%, #1b2236 ${v}%)`;
+  }
+
+  /* ---------- 19-axis radar ---------- */
+  function radarSVG(vals, color) {
+    const size = 188, c = size / 2, maxR = 76, n = vals.length;
+    const ang = (i) => -Math.PI / 2 + (i * 2 * Math.PI) / n;
+    const ring = (f) => vals.map((_, i) => {
+      const r = maxR * f;
+      return (c + r * Math.cos(ang(i))).toFixed(1) + "," + (c + r * Math.sin(ang(i))).toFixed(1);
+    }).join(" ");
+    const data = vals.map((v, i) => {
+      const r = maxR * (Math.max(0, Math.min(100, v)) / 100);
+      return (c + r * Math.cos(ang(i))).toFixed(1) + "," + (c + r * Math.sin(ang(i))).toFixed(1);
+    }).join(" ");
+    const spokes = vals.map((_, i) => {
+      const x = (c + maxR * Math.cos(ang(i))).toFixed(1);
+      const y = (c + maxR * Math.sin(ang(i))).toFixed(1);
+      return `<line x1="${c}" y1="${c}" x2="${x}" y2="${y}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+    }).join("");
+    return `<svg viewBox="0 0 ${size} ${size}" class="w-full h-auto" aria-hidden="true">
+      <polygon points="${ring(1)}" fill="none" stroke="rgba(255,255,255,0.11)" stroke-width="1"/>
+      <polygon points="${ring(0.66)}" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+      <polygon points="${ring(0.33)}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      ${spokes}
+      <polygon points="${data}" fill="${color}30" stroke="${color}" stroke-width="2" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px ${color}aa)"/>
+    </svg>`;
+  }
+
+  /* ---------- build form ---------- */
+  function buildForm() {
+    const host = $("formGroups");
+    host.innerHTML = GROUPS.map((g) => `
+      <div class="rounded-xl border border-edge/70 bg-panel2/50 p-3.5" style="--accent:${g.accent}">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="font-display font-bold text-sm" style="color:${g.accent}">${g.key}</span>
+            <span class="text-sm text-slate-200">${g.title}</span>
+          </div>
+          <span class="text-[11px] font-display tracking-wider px-2 py-0.5 rounded-full border"
+                style="color:${g.accent};border-color:${g.accent}55">×${g.weight}</span>
+        </div>
+        <div class="space-y-3">
+          ${g.stats.map((name, i) => `
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[13px] text-slate-300">${name}</span>
+                <span id="v-${g.key}-${i}" class="font-display text-xs px-1.5 py-0.5 rounded bg-edge/60 text-slate-200 min-w-[34px] text-center">85</span>
+              </div>
+              <input type="range" min="0" max="100" value="85" step="1"
+                     id="r-${g.key}-${i}" data-group="${g.key}" data-idx="${i}" class="slider" />
+            </div>`).join("")}
+        </div>
+      </div>`).join("");
+
+    host.querySelectorAll("input[type=range]").forEach((inp) => {
+      setFill(inp);
+      inp.addEventListener("input", () => {
+        $(`v-${inp.dataset.group}-${inp.dataset.idx}`).textContent = inp.value;
+        setFill(inp);
+        updatePreview();
+      });
+    });
+  }
+
+  function readForm() {
+    const values = { A: [], B: [], C: [] };
+    GROUPS.forEach((g) => g.stats.forEach((_, i) => {
+      values[g.key].push(parseInt($(`r-${g.key}-${i}`).value, 10) || 0);
+    }));
+    return values;
+  }
+
+  function updatePreview() {
+    const v = readForm();
+    const s = scoreOf(v);
+    const grade = gradeOf(s);
+    const m = GRADE_META[grade];
+    $("pv-score").textContent = s;
+    const tag = $("pv-grade");
+    tag.textContent = grade;
+    tag.style.color = m.color;
+    tag.style.borderColor = m.color + "88";
+    tag.style.boxShadow = `0 0 16px ${m.color}55`;
+  }
+
+  /* ---------- render album ---------- */
+  function cardHTML(card) {
+    const m = GRADE_META[card.grade] || GRADE_META.F;
+    const flat = [...card.values.A, ...card.values.B, ...card.values.C];
+    return `
+      <article class="tcg-card ${card.grade === "S" ? "is-s" : ""}"
+               style="--glow:${m.glow}; border-color:${m.color}66; background:${m.grad}, #0b0f19;">
+        <button class="del" data-del="${card.id}" title="삭제" aria-label="카드 삭제">✕</button>
+        <div class="flex items-start justify-between gap-3 pr-7">
+          <div class="badge" style="color:${m.color};border-color:${m.color}99;box-shadow:0 0 16px ${m.color}55;">${card.grade}</div>
+          <div class="text-right pt-1">
+            <div class="cat">${esc(card.category || "UNCATEGORIZED")}</div>
+            <h3 class="name" style="background:linear-gradient(90deg,#ffffff,${m.color});-webkit-background-clip:text;background-clip:text;color:transparent;">${esc(card.name || "이름 없는 카드")}</h3>
+          </div>
+        </div>
+        <div class="radar">${radarSVG(flat, m.color)}</div>
+        <div class="score-row">
+          <div><span class="score" style="color:${m.color}">${card.score}</span><span class="slash">/100</span></div>
+          <div class="gtag" style="color:${m.color};border-color:${m.color}66;">${card.grade} RANK</div>
+        </div>
+        <p class="cmt">${esc(card.comment || "—")}</p>
+      </article>`;
+  }
+
+  function render() {
+    const cards = store.read();
+    $("count").textContent = cards.length;
+    const album = $("album");
+    const empty = $("empty");
+    if (!cards.length) {
+      album.innerHTML = "";
+      empty.classList.remove("hidden");
+      return;
+    }
+    empty.classList.add("hidden");
+    album.innerHTML = cards.map(cardHTML).join("");
+  }
+
+  /* ---------- actions ---------- */
+  function addCard() {
+    const values = readForm();
+    const score = scoreOf(values);
+    const card = {
+      id: (crypto.randomUUID ? crypto.randomUUID() : "c" + Date.now() + Math.random().toString(36).slice(2)),
+      category: $("f-category").value.trim(),
+      name: $("f-name").value.trim(),
+      comment: $("f-comment").value.trim(),
+      values, score,
+      grade: gradeOf(score),
+      createdAt: Date.now(),
+    };
+    const cards = store.read();
+    cards.unshift(card);            // 최신순(역순) — 새 카드를 맨 앞에
+    store.write(cards);
+    render();
+  }
+
+  function deleteCard(id) {
+    store.write(store.read().filter((c) => c.id !== id));
+    render();
+  }
+
+  function resetAll() {
+    if (!store.read().length) return;
+    if (confirm("앨범의 모든 카드를 삭제할까요? 되돌릴 수 없습니다.")) {
+      store.write([]);
+      render();
+    }
+  }
+
+  /* ---------- wire up ---------- */
+  buildForm();
+  updatePreview();
+  render();
+
+  $("addBtn").addEventListener("click", addCard);
+  $("resetBtn").addEventListener("click", resetAll);
+  $("album").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-del]");
+    if (btn) deleteCard(btn.getAttribute("data-del"));
+  });
+})();
+</script>
 </body>
 </html>
